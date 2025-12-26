@@ -1,40 +1,57 @@
-Feature: The product store service back-end
-    As a Product Store Owner
-    I need a RESTful catalog service
-    So that I can keep track of all my products
+# features/products.feature
 
-Background:
-    Given the following products
-        | name       | description     | price   | available | category   |
-        | Hat        | A red fedora    | 59.95   | True      | CLOTHS     |
-        | Shoes      | Blue shoes      | 120.50  | False     | CLOTHS     |
-        | Big Mac    | 1/4 lb burger   | 5.99    | True      | FOOD       |
-        | Sheets     | Full bed sheets | 87.00   | True      | HOUSEWARES |
+Feature: Product Management
 
-Scenario: The server is running
-    When I visit the "Home Page"
-    Then I should see "Product Catalog Administration" in the title
-    And I should not see "404 Not Found"
+  # Escenario de Leer un producto
+  Scenario: Leer un producto
+    Given que el producto con el id "1" existe
+    When se solicita el producto con el id "1"
+    Then la respuesta debe ser un código 200
+    And el nombre del producto debe ser "Test Product"
+    
+  # Escenario de Actualizar un producto
+  Scenario: Actualizar un producto
+    Given que el producto con el id "1" existe
+    When actualizo el producto con el id "1" con los siguientes datos:
+      | name         | "Updated Product"     |
+      | description  | "Updated description" |
+      | price        | "150"                 |
+      | available    | "true"                |
+      | category     | "Electronics"         |
+    Then la respuesta debe ser un código 200
+    And el nombre del producto debe ser "Updated Product"
 
-Scenario: Create a Product
-    When I visit the "Home Page"
-    And I set the "Name" to "Hammer"
-    And I set the "Description" to "Claw hammer"
-    And I select "True" in the "Available" dropdown
-    And I select "Tools" in the "Category" dropdown
-    And I set the "Price" to "34.95"
-    And I press the "Create" button
-    Then I should see the message "Success"
-    When I copy the "Id" field
-    And I press the "Clear" button
-    Then the "Id" field should be empty
-    And the "Name" field should be empty
-    And the "Description" field should be empty
-    When I paste the "Id" field
-    And I press the "Retrieve" button
-    Then I should see the message "Success"
-    And I should see "Hammer" in the "Name" field
-    And I should see "Claw hammer" in the "Description" field
-    And I should see "True" in the "Available" dropdown
-    And I should see "Tools" in the "Category" dropdown
-    And I should see "34.95" in the "Price" field
+  # Escenario de Borrar un producto
+  Scenario: Borrar un producto
+    Given que el producto con el id "1" existe
+    When se solicita la eliminación del producto con el id "1"
+    Then la respuesta debe ser un código 204
+    And el producto con el id "1" ya no debe existir
+
+  # Escenario de Listar todos los productos
+  Scenario: Listar todos los productos
+    Given que hay 5 productos existentes
+    When se solicita la lista de productos
+    Then la respuesta debe ser un código 200
+    And debe haber 5 productos en la lista
+
+  # Escenario de Buscar productos por nombre
+  Scenario: Buscar productos por nombre
+    Given que hay un producto con el nombre "Test Product"
+    When se solicita la lista de productos con el parámetro "name" igual a "Test Product"
+    Then la respuesta debe ser un código 200
+    And el nombre del producto en la lista debe ser "Test Product"
+
+  # Escenario de Buscar productos por categoría
+  Scenario: Buscar productos por categoría
+    Given que hay un producto con la categoría "Electronics"
+    When se solicita la lista de productos con el parámetro "category" igual a "Electronics"
+    Then la respuesta debe ser un código 200
+    And la categoría del producto en la lista debe ser "Electronics"
+
+  # Escenario de Buscar productos por disponibilidad
+  Scenario: Buscar productos por disponibilidad
+    Given que hay un producto con disponibilidad "true"
+    When se solicita la lista de productos con el parámetro "available" igual a "true"
+    Then la respuesta debe ser un código 200
+    And el producto en la lista debe estar disponible
